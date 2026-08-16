@@ -25,8 +25,8 @@ def add():
     data = {"id": len(tasks) + 1, #I think assiging the ID will be the problem when we delete one task. Will be great if it updates along with the list
             "description":task_description,
             "Status": "to do",
-            "createAt": f"{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}",
-            "updateAt": None}
+            "createAt": f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            "updateAt": f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}" }
 
     tasks.append(data)
     # Save the updated list back to the file
@@ -49,7 +49,7 @@ def to_mark_progress():
         for values in task.values(): #since i stored the json file like this [{'id:2','discroption': 'Task name",....} , {'id':3,'discription':...}]
             if values == id:
                 tasks[id-1]["Status"] = "in progress"
-                tasks[id-1]["updateAt"] = f"{datetime.datetime.now()}"
+                tasks[id-1]["updateAt"] = f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 with open("task_data.json", "w") as file:
                     json.dump(tasks, file, indent=4)
                 print(f'Marked the task {tasks[id-1]["description"]} as in progress')
@@ -70,7 +70,7 @@ def to_mark_done():
         for keys,values in task.items():
             if values == id:
                 task["Status"] = "done"
-                task["updateAt"] = f"{datetime.datetime.now()}"
+                task["updateAt"] = f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 with open("task_data.json", "w") as file:
                     json.dump(tasks, file, indent=4)
                 print(f'Marked the task {tasks[id-1]["description"]} as done')
@@ -82,9 +82,8 @@ def display():
         done_list = []
         tasks = open_json_file()
         for task in tasks:
-            for keys,value in task.items():
-                if value == "done":
-                    done_list.append(task['description']) 
+            if task["Status"] == 'done':
+                done_list.append(task) 
         if done_list:            
             for n,task in enumerate(done_list, start=1):
                 print(n,'.', task)
@@ -95,9 +94,8 @@ def display():
         inprogress_list = []
         tasks = open_json_file()
         for task in tasks:
-            for keys,value in task.items():
-                if value == "in progress":
-                    inprogress_list.append(task['description'])
+            if task['Status'] == "in progress":
+                inprogress_list.append(task)
 
         if inprogress_list:            
             for n,task in enumerate(inprogress_list, start=1):
@@ -108,9 +106,8 @@ def display():
         todo_list = []
         tasks = open_json_file()
         for task in tasks:
-            for keys,value in task.items():
-                if value == "to do":
-                    todo_list.append(task['description'])
+            if task['Status'] == 'to do':
+                todo_list.append(task)
         if todo_list:            
             for n,task in enumerate(todo_list, start=1):
                 print(n,'.', task)
@@ -138,19 +135,16 @@ def update():
             break
         else:
             print('Id is not valid')
-
     new_description = input('Update Task: ')
-
     tasks = open_json_file()
 
     for task in tasks:
-        for keys,values in task.items():
-            if values == user_input:
-                task['description'] = new_description
-                task["updateAt"] = f"{datetime.datetime.now()}"
-                with open("task_data.json", "w") as file:
-                    json.dump(tasks, file, indent=4)
-
+        if task['id'] == user_input:
+            task['description'] = new_description
+            task["updateAt"] = f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            with open("task_data.json", "w") as file:
+                json.dump(tasks, file, indent=4)
+        
 def delete():
     while True:
         id = input('Task ID: ')
@@ -160,11 +154,14 @@ def delete():
         else:
             print('Id is not valid')
     tasks = open_json_file()
-    for task in tasks:
-        for keys,values in task.items():
-            if values == id:
-                del task
-                print(f'{task} has been deleted.')
+    initial_len = len(tasks)
+    remaining_tasks = [task for task in tasks if task['id'] != id]
+    if len(remaining_tasks) < initial_len:
+        with open("task_data.json", "w") as file:
+            json.dump(remaining_tasks, file, indent=4)
+        print('Task has been deleted.')
+    else:
+        print('Task id is not found')
 
 def main():
     is_running = True
