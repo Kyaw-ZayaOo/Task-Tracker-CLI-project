@@ -21,8 +21,8 @@ def add():
 
     #Opening the Json file by using the function.........
     tasks = open_json_file()
-
-    data = {"id": len(tasks) + 1, #I think assiging the ID will be the problem when we delete one task. Will be great if it updates along with the list
+    next_id = max([task["id"] for task in tasks]) + 1 if tasks else 1
+    data = {"id": next_id, #I think assiging the ID will be the problem when we delete one task. Will be great if it updates along with the list
             "description":task_description,
             "Status": "to do",
             "createAt": f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
@@ -41,15 +41,13 @@ def to_mark_progress():
             id = int(id)
             break
         else:
-            print('Id is not valid')
-            
+            print('Id is not valid')       
     tasks = open_json_file()
     #iteration the list and ......
     for task in tasks:
-        for values in task.values(): #since i stored the json file like this [{'id:2','discroption': 'Task name",....} , {'id':3,'discription':...}]
-            if values == id:
-                tasks[id-1]["Status"] = "in progress"
-                tasks[id-1]["updateAt"] = f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            if task['id'] == id:
+                task['Status']= "in progress"
+                task['updateAt']= f"{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 with open("task_data.json", "w") as file:
                     json.dump(tasks, file, indent=4)
                 print(f'Marked the task {tasks[id-1]["description"]} as in progress')
